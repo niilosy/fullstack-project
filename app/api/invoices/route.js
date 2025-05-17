@@ -20,7 +20,7 @@ export async function GET() {
 
 
 export async function POST(req, res) {
-  const session = await getServerSession({ req, res }, authOptions);
+  const session = await getServerSession({ req }, authOptions);
 
   if (!session || !session.user?.email) {
     return new Response("Unauthorized", { status: 401 });
