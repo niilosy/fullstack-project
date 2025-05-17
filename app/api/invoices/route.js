@@ -6,12 +6,16 @@ import { NextResponse } from "next/server";
 const prisma = new PrismaClient();
 
 export async function GET() {
-  const invoices = await prisma.invoice.findMany();
-  return NextResponse.json(invoices);
+  try {
+    const invoices = await prisma.invoice.findMany();
+    return NextResponse.json(invoices);
+  } catch (error) {
+    return NextResponse.json({ error: "Error fetching invoices" }, { status: 500 });
+  }
 }
 
-export async function POST(req) {
-  const session = await getServerSession(authOptions);
+export async function POST(req, res) {
+  const session = await getServerSession({ req, res }, authOptions);
 
   if (!session || !session.user?.email) {
     return new Response("Unauthorized", { status: 401 });
@@ -38,5 +42,6 @@ export async function POST(req) {
 
   return NextResponse.json(newInvoice, { status: 201 });
 }
+
 
 
