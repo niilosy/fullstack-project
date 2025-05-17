@@ -15,10 +15,37 @@ export async function GET() {
 }
 
 export async function POST(req) {
-  return new Response(JSON.stringify({ message: 'POST works' }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+  if (!token?.email) {
+    return new Response('Unauthorized', { status: 401 });
+  }
+
+  const body = await req.json();
+
+  const user = await prisma.user.findUnique({
+    where: { email: token.email },
   });
+
+  if (!user) {
+    return new Response('User not found', { status: 404 });
+  }
+
+  try {
+    const newInvoice = await prisma.invoice.create({
+      data: {
+        client: body.client,
+        amount: parseFloat(body.amount),
+        status: body.status,
+        userId: user.id,
+      },
+    });
+
+    return NextResponse.json(newInvoice, { status: 201 });
+  } catch (error) {
+    console.error('Error creating invoice:', error);
+    return NextResponse.json({ error: 'Failed to create invoice' }, { status: 500 });
+  }
 }
 
 
