@@ -10,9 +10,14 @@ export async function GET() {
     const invoices = await prisma.invoice.findMany();
     return NextResponse.json(invoices);
   } catch (error) {
-    return NextResponse.json({ error: "Error fetching invoices" }, { status: 500 });
+    console.error('Error fetching invoices:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch invoices' },
+      { status: 500 }
+    );
   }
 }
+
 
 export async function POST(req, res) {
   const session = await getServerSession({ req, res }, authOptions);
