@@ -1,7 +1,7 @@
 import NextAuth from 'next-auth';
 import GitHubProvider from 'next-auth/providers/github';
 
-export const authOptions = {
+const authOptions = {
   providers: [
     GitHubProvider({
       clientId: process.env.GITHUB_ID,
@@ -16,7 +16,7 @@ export const authOptions = {
       }
       return session;
     },
-    async jwt({ token, account, profile }) {
+    async jwt({ token, profile }) {
       if (profile?.email) {
         token.email = profile.email;
       }
@@ -27,5 +27,4 @@ export const authOptions = {
 
 const handler = NextAuth(authOptions);
 
-export { handler as GET, handler as POST };
-
+export { handler as GET, handler as POST }
