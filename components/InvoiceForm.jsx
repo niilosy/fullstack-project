@@ -7,7 +7,7 @@ export default function InvoiceForm({ onSubmit, initialData }) {
   const [amount, setAmount] = useState('');
   const [status, setStatus] = useState('unpaid');
 
-  // Load from localStorage if no initialData (i.e., new form)
+  // Load draft or initial data
   useEffect(() => {
     if (initialData) {
       setClient(initialData.client);
@@ -21,7 +21,7 @@ export default function InvoiceForm({ onSubmit, initialData }) {
     }
   }, [initialData]);
 
-  // Save to localStorage when fields change and no initialData (i.e., not editing)
+  // Save draft to localStorage
   useEffect(() => {
     if (!initialData) {
       const draft = { client, amount, status };
@@ -29,7 +29,7 @@ export default function InvoiceForm({ onSubmit, initialData }) {
     }
   }, [client, amount, status, initialData]);
 
-  async function handleSubmit(e) {
+  function handleSubmit(e) {
     e.preventDefault();
 
     if (!client || !amount) return;
@@ -38,20 +38,11 @@ export default function InvoiceForm({ onSubmit, initialData }) {
       client,
       amount: parseFloat(amount),
       status,
+      id: initialData?.id || crypto.randomUUID(), // generate ID if new
     };
 
-    const res = await fetch('/api/invoices', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newInvoice),
-    });
+    onSubmit(newInvoice);
 
-    if (!res.ok) return;
-
-    const savedInvoice = await res.json();
-    onSubmit(savedInvoice);
-
-    // Clear form and localStorage if it's a new invoice
     if (!initialData) {
       setClient('');
       setAmount('');
@@ -109,6 +100,7 @@ export default function InvoiceForm({ onSubmit, initialData }) {
     </form>
   );
 }
+
 
 
 
