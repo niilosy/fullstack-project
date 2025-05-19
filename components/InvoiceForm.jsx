@@ -38,7 +38,7 @@ export default function InvoiceForm({ onSubmit, initialData }) {
       client,
       amount: parseFloat(amount),
       status,
-      id: initialData?.id || crypto.randomUUID(), // generate ID if new
+      id: initialData?.id || crypto.randomUUID(),
     };
 
     onSubmit(newInvoice);
