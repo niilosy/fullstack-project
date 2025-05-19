@@ -21,30 +21,31 @@ export default function DashboardPage() {
     }
   }, [status, router]);
 
-  // Fetch invoices when user is authenticated
+  // Load invoices from localStorage
   useEffect(() => {
     if (status === 'authenticated') {
-      async function fetchInvoices() {
-        try {
-          const res = await fetch('/api/invoices');
-          if (!res.ok) throw new Error('Failed to fetch invoices');
-          const data = await res.json();
-          setInvoices(data);
-        } catch (error) {
-          console.error(error);
-          setInvoices([]); // or show an error message
-        }
-      }
-      fetchInvoices();
+      const saved = JSON.parse(localStorage.getItem('invoices') || '[]');
+      setInvoices(saved);
     }
   }, [status]);
+
+  // Save to localStorage whenever invoices change
+  useEffect(() => {
+    if (status === 'authenticated') {
+      localStorage.setItem('invoices', JSON.stringify(invoices));
+    }
+  }, [invoices, status]);
 
   function addOrUpdateInvoice(newInvoice) {
     setInvoices((prev) => {
       const exists = prev.find((inv) => inv.id === newInvoice.id);
-      return exists
-        ? prev.map((inv) => (inv.id === newInvoice.id ? newInvoice : inv))
-        : [...prev, newInvoice];
+      if (exists) {
+        return prev.map((inv) =>
+          inv.id === newInvoice.id ? newInvoice : inv
+        );
+      } else {
+        return [...prev, { ...newInvoice, id: crypto.randomUUID() }];
+      }
     });
     setEditingInvoice(null);
   }
